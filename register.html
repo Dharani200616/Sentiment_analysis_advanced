@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+    <title>Register | Create Account</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', system-ui, 'Segoe UI', sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            overflow-x: hidden;
+            overflow-y: auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background:
+                radial-gradient(circle at 20% 20%, rgba(255, 215, 0, 0.18), transparent 22%),
+                radial-gradient(circle at 80% 30%, rgba(255, 255, 255, 0.08), transparent 18%),
+                radial-gradient(circle at 50% 80%, rgba(255, 200, 0, 0.12), transparent 24%),
+                linear-gradient(135deg, #050507, #111118 50%, #070709);
+            position: relative;
+            padding: 20px;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(circle at 10% 15%, rgba(255, 255, 255, 0.04) 0 2px, transparent 3px),
+                radial-gradient(circle at 30% 70%, rgba(255, 255, 255, 0.03) 0 2px, transparent 3px),
+                radial-gradient(circle at 70% 25%, rgba(255, 255, 255, 0.04) 0 2px, transparent 3px),
+                radial-gradient(circle at 90% 65%, rgba(255, 255, 255, 0.03) 0 2px, transparent 3px);
+            pointer-events: none;
+            opacity: 0.7;
+            z-index: 0;
+        }
+
+        .emoji {
+            position: fixed;
+            font-size: 2rem;
+            animation: floatUp 10s linear infinite;
+            opacity: 0.85;
+            z-index: 1;
+            user-select: none;
+            pointer-events: none;
+            bottom: -10%;
+        }
+
+        .e1 { left: 8%; animation-delay: 0s; font-size: 2rem; }
+        .e2 { left: 20%; animation-delay: 1.5s; font-size: 2.1rem; }
+        .e3 { left: 35%; animation-delay: 3s; font-size: 1.9rem; }
+        .e4 { left: 52%; animation-delay: 0.8s; font-size: 2.2rem; }
+        .e5 { left: 68%; animation-delay: 2.2s; font-size: 2rem; }
+        .e6 { left: 82%; animation-delay: 4s; font-size: 2.3rem; }
+        .e7 { left: 94%; animation-delay: 5.6s; font-size: 1.8rem; display: none; }
+
+        @media (min-width: 640px) { .e7 { display: block; } }
+
+        @keyframes floatUp {
+            0% { bottom: -15%; transform: translateX(0) rotate(0deg) scale(0.7); opacity: 0; }
+            15% { opacity: 0.9; }
+            85% { opacity: 0.9; }
+            100% { bottom: 110%; transform: translateX(20px) rotate(320deg) scale(1.2); opacity: 0; }
+        }
+
+        .card {
+            position: relative;
+            z-index: 12;
+            width: min(92vw, 440px);
+            padding: 38px 32px 42px;
+            border-radius: 40px;
+            background: rgba(20, 20, 35, 0.60);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(255, 215, 0, 0.12) inset;
+            transition: transform 0.3s ease, border-color 0.3s ease;
+            color: #fff;
+            text-align: center;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(255, 215, 0, 0.4);
+            box-shadow: 0 32px 64px rgba(0, 0, 0, 0.65), 0 0 30px rgba(255, 200, 0, 0.08);
+        }
+
+        .logo {
+            width: 58px;
+            height: 58px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #FFD700, #FF8C00);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.6rem;
+            margin: 0 auto 18px;
+            box-shadow: 0 6px 20px rgba(255, 160, 0, 0.4);
+        }
+
+        h1 {
+            font-size: 2rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #FFF8E7, #FFE082, #FFB347);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            margin-bottom: 6px;
+            letter-spacing: -0.5px;
+        }
+
+        .sub {
+            color: rgba(255, 245, 210, 0.7);
+            margin-bottom: 28px;
+            font-size: 0.88rem;
+            font-weight: 400;
+        }
+
+        .divider {
+            width: 40px;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #FFD700, transparent);
+            margin: 0 auto 26px;
+            border-radius: 2px;
+        }
+
+        .input-group {
+            position: relative;
+            width: 100%;
+            margin: 10px 0;
+        }
+
+        .input-group .icon {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1rem;
+            opacity: 0.6;
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 14px 18px 14px 44px;
+            border: 1.5px solid rgba(255, 255, 255, 0.14);
+            outline: none;
+            border-radius: 34px;
+            background: rgba(10, 10, 22, 0.65);
+            color: #fef9e6;
+            font-size: 0.93rem;
+            font-weight: 500;
+            transition: all 0.25s;
+        }
+
+        .input-group input:focus {
+            border-color: #FFD700;
+            background: rgba(20, 20, 40, 0.85);
+            box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.18), 0 4px 16px rgba(0,0,0,0.3);
+        }
+
+        .input-group input::placeholder {
+            color: rgba(240, 230, 200, 0.5);
+            font-weight: 400;
+        }
+
+        .strength-bar {
+            height: 3px;
+            border-radius: 3px;
+            margin: 5px 14px 0;
+            background: rgba(255,255,255,0.08);
+            overflow: hidden;
+            transition: all 0.3s;
+        }
+
+        .strength-fill {
+            height: 100%;
+            width: 0%;
+            border-radius: 3px;
+            transition: width 0.4s ease, background 0.4s ease;
+        }
+
+        .btn {
+            width: 100%;
+            margin-top: 22px;
+            padding: 15px;
+            border: none;
+            border-radius: 44px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 700;
+            color: #1a1200;
+            background: linear-gradient(105deg, #FFE082, #FFB347);
+            box-shadow: 0 8px 24px rgba(255, 160, 60, 0.35);
+            transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s;
+            letter-spacing: 0.3px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 14px 32px rgba(255, 160, 60, 0.5);
+            filter: brightness(1.05);
+        }
+
+        .btn:active { transform: translateY(1px); }
+        .btn:disabled { opacity: 0.65; transform: none; cursor: wait; }
+
+        #message {
+            margin-top: 18px;
+            font-size: 0.88rem;
+            font-weight: 600;
+            min-height: 42px;
+            padding: 8px 14px;
+            border-radius: 40px;
+            background: rgba(0, 0, 0, 0.28);
+            backdrop-filter: blur(4px);
+            transition: all 0.3s;
+        }
+
+        .success { color: #B2FF9E; }
+        .error { color: #FFB3B3; }
+
+        .footer-link {
+            margin-top: 22px;
+            color: rgba(255, 245, 210, 0.6);
+            font-size: 0.82rem;
+        }
+
+        .footer-link a {
+            color: #FFD700;
+            text-decoration: none;
+            font-weight: 600;
+            transition: opacity 0.2s;
+        }
+
+        .footer-link a:hover { opacity: 0.8; text-decoration: underline; }
+
+        @media (max-width: 480px) {
+            .card { padding: 30px 20px 34px; }
+            h1 { font-size: 1.75rem; }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="emoji e1">😊</div>
+    <div class="emoji e2">😄</div>
+    <div class="emoji e3">🙂</div>
+    <div class="emoji e4">✨</div>
+    <div class="emoji e5">🌟</div>
+    <div class="emoji e6">😊</div>
+    <div class="emoji e7">🎉</div>
+
+    <div class="card">
+        <div class="logo">✨</div>
+        <h1>Create Account</h1>
+        <p class="sub">Join us today — it's free!</p>
+        <div class="divider"></div>
+
+        <form id="registerForm" novalidate>
+            <div class="input-group">
+                <span class="icon">👤</span>
+                <input type="text" id="name" placeholder="Full Name" autocomplete="name" required />
+            </div>
+            <div class="input-group">
+                <span class="icon">📧</span>
+                <input type="email" id="email" placeholder="Email address" autocomplete="email" required />
+            </div>
+            <div class="input-group">
+                <span class="icon">🔒</span>
+                <input type="password" id="password" placeholder="Password (min. 6 characters)" autocomplete="new-password" required />
+            </div>
+            <div class="strength-bar"><div class="strength-fill" id="strengthFill"></div></div>
+            <div class="input-group" style="margin-top:10px;">
+                <span class="icon">🔑</span>
+                <input type="password" id="confirmPassword" placeholder="Confirm password" autocomplete="off" required />
+            </div>
+            <button class="btn" type="submit" id="submitBtn">✨ Create Account</button>
+        </form>
+
+        <div id="message"></div>
+        <div class="footer-link">Already have an account? <a href="login.html">Sign in →</a></div>
+    </div>
+
+    <script>
+    (function () {
+        const form = document.getElementById("registerForm");
+        const messageDiv = document.getElementById("message");
+        const submitBtn = document.getElementById("submitBtn");
+        const pwdInput = document.getElementById("password");
+        const confirmPwdInput = document.getElementById("confirmPassword");
+        const strengthFill = document.getElementById("strengthFill");
+        let redirectTimer = null, isProcessing = false;
+
+        function showMessage(text, type) {
+            messageDiv.textContent = text;
+            messageDiv.className = type;
+            if (type === "error") {
+                clearTimeout(window._msgTimeout);
+                window._msgTimeout = setTimeout(() => { if (messageDiv.className === "error") messageDiv.textContent = ""; }, 4500);
+            }
+        }
+
+        // Password strength
+        pwdInput.addEventListener("input", () => {
+            const v = pwdInput.value;
+            let score = 0;
+            if (v.length >= 6) score++;
+            if (v.length >= 10) score++;
+            if (/[A-Z]/.test(v)) score++;
+            if (/[0-9]/.test(v)) score++;
+            if (/[^A-Za-z0-9]/.test(v)) score++;
+            const pct = (score / 5) * 100;
+            const colors = ["#ff4444", "#ff8800", "#ffcc00", "#88dd00", "#00cc55"];
+            strengthFill.style.width = pct + "%";
+            strengthFill.style.background = colors[Math.max(0, score - 1)] || "transparent";
+        });
+
+        // Live confirm match clear
+        [pwdInput, confirmPwdInput].forEach(el => {
+            el.addEventListener("input", () => {
+                if (messageDiv.textContent.toLowerCase().includes("passwords do not match") && pwdInput.value === confirmPwdInput.value)
+                    messageDiv.textContent = "";
+            });
+        });
+
+        form.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            if (isProcessing) return;
+            if (redirectTimer) { clearTimeout(redirectTimer); redirectTimer = null; }
+
+            const name = document.getElementById("name").value.trim();
+            const email = document.getElementById("email").value.trim();
+            const password = pwdInput.value;
+            const confirmPassword = confirmPwdInput.value;
+
+            if (!name || !email || !password || !confirmPassword) return showMessage("⚠️ Please fill in all fields.", "error");
+            if (name.length < 2) return showMessage("👤 Name must be at least 2 characters.", "error");
+            if (!/^[^\s@]+@([^\s@]+\.)+[^\s@]+$/.test(email)) return showMessage("📧 Enter a valid email address.", "error");
+            if (password.length < 6) return showMessage("🔒 Password must be at least 6 characters.", "error");
+            if (password !== confirmPassword) return showMessage("❌ Passwords do not match.", "error");
+
+            isProcessing = true;
+            submitBtn.disabled = true;
+            submitBtn.textContent = "Creating account...";
+
+            // Save user to localStorage
+            const users = JSON.parse(localStorage.getItem("users") || "[]");
+            if (users.find(u => u.email === email)) {
+                showMessage("📧 This email is already registered.", "error");
+                submitBtn.disabled = false;
+                submitBtn.textContent = "✨ Create Account";
+                isProcessing = false;
+                return;
+            }
+            users.push({ name, email, password });
+            localStorage.setItem("users", JSON.stringify(users));
+
+            showMessage("🎉 Account created! Redirecting to login...", "success");
+            submitBtn.textContent = "✓ Redirecting...";
+            redirectTimer = setTimeout(() => { window.location.href = "login.html"; }, 2000);
+        });
+    })();
+    </script>
+</body>
+</html>
