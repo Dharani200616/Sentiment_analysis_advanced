@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Analytics & Performance | Sentiment AI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; font-family:'Inter',sans-serif; }
+
+        :root {
+            --gold: #FFD700;
+            --gold-dim: rgba(255,215,0,0.15);
+            --glass: rgba(20,20,38,0.65);
+            --border: rgba(255,255,255,0.12);
+            --text: #F5ECD7;
+            --muted: rgba(245,236,215,0.58);
+            --sidebar-w: 240px;
+            --success: #2ecc71;
+            --danger: #e74c3c;
+        }
+
+        body {
+            min-height: 100vh;
+            background:
+                radial-gradient(circle at 15% 20%, rgba(255,215,0,0.08) 0%, transparent 28%),
+                radial-gradient(circle at 80% 80%, rgba(255,120,0,0.06) 0%, transparent 26%),
+                linear-gradient(140deg,#05050a,#0a0a1a 50%,#06060c);
+            color: var(--text);
+            display: flex;
+            overflow-x: hidden;
+        }
+
+        /* ── Sidebar ── */
+        .sidebar {
+            width: var(--sidebar-w);
+            min-height: 100vh;
+            background: rgba(10,10,22,0.8);
+            backdrop-filter: blur(20px);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            padding: 28px 0 24px;
+            position: fixed;
+            left: 0; top: 0; bottom: 0;
+            z-index: 100;
+            transition: transform 0.3s;
+        }
+
+        .sidebar-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 0 22px 28px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .sidebar-logo .icon {
+            width: 42px; height: 42px;
+            border-radius: 14px;
+            background: linear-gradient(135deg,#FFD700,#FF8C00);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.2rem;
+            box-shadow: 0 6px 16px rgba(255,160,0,0.4);
+            flex-shrink: 0;
+        }
+
+        .sidebar-logo span { font-size: 1.05rem; font-weight: 700; color: #FFF8E7; }
+
+        nav { padding: 20px 12px; flex: 1; }
+
+        .nav-label {
+            font-size: 0.68rem;
+            font-weight: 600;
+            letter-spacing: 1.2px;
+            color: var(--muted);
+            text-transform: uppercase;
+            padding: 0 10px;
+            margin: 18px 0 8px;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 11px 14px;
+            border-radius: 14px;
+            text-decoration: none;
+            color: var(--muted);
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.2s;
+            cursor: pointer;
+            border: none;
+            background: none;
+            width: 100%;
+            margin-bottom: 3px;
+            text-align: left;
+        }
+
+        .nav-link:hover { background: var(--gold-dim); color: var(--text); }
+        .nav-link.active { background: linear-gradient(105deg,rgba(255,215,0,0.2),rgba(255,140,0,0.12)); color: #FFE082; border: 1px solid rgba(255,215,0,0.25); }
+
+        .sidebar-footer { padding: 18px 12px 0; border-top: 1px solid var(--border); }
+        .logout-btn {
+            display:flex; align-items:center; gap:10px;
+            padding:11px 14px; border-radius:14px;
+            border:none; background:rgba(255,80,80,0.1);
+            color:rgba(255,160,160,0.9); font-size:0.88rem; font-weight:600;
+            cursor:pointer; width:100%;
+            transition:all 0.2s;
+        }
+        .logout-btn:hover { background:rgba(255,80,80,0.2); color:#FFB3B3; }
+
+        /* ── Main Layout ── */
+        .main {
+            margin-left: var(--sidebar-w);
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            width: calc(100% - var(--sidebar-w));
+        }
+
+        /* ── Topbar ── */
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 18px 32px;
+            background: rgba(8,8,18,0.5);
+            backdrop-filter: blur(14px);
+            border-bottom: 1px solid var(--border);
+            position: sticky; top: 0; z-index: 50;
+        }
+
+        .topbar-left h2 { font-size: 1.25rem; font-weight: 700; color: #FFF8E7; }
+        .topbar-left p  { font-size: 0.8rem; color: var(--muted); margin-top: 2px; }
+
+        .topbar-right { display: flex; align-items: center; gap: 14px; }
+        .back-btn {
+            padding: 8px 16px;
+            border-radius: 12px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--border);
+            color: var(--text);
+            text-decoration: none;
+            font-size: 0.82rem;
+            font-weight: 600;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .back-btn:hover { background: var(--gold-dim); border-color: rgba(255,215,0,0.3); }
+
+        .avatar {
+            width: 38px; height: 38px;
+            border-radius: 50%;
+            background: linear-gradient(135deg,#FFD700,#FF8C00);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.95rem; font-weight: 700; color: #1a1200;
+            border: 2px solid rgba(255,215,0,0.4);
+        }
+
+        /* ── Content Area ── */
+        .content-area { padding: 32px; flex: 1; }
+
+        /* ── Sub Header / Tabs ── */
+        .tab-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 28px;
+            overflow-x: auto;
+            padding-bottom: 4px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .tab-btn {
+            padding: 10px 20px;
+            border-radius: 12px 12px 0 0;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border);
+            border-bottom: none;
+            color: var(--muted);
+            font-size: 0.88rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.25s;
+            white-space: nowrap;
+        }
+
+        .tab-btn:hover { background: rgba(255,255,255,0.07); color: var(--text); }
+        .tab-btn.active {
+            background: var(--glass);
+            border-top: 2px solid var(--gold);
+            color: #FFE082;
+            padding-bottom: 12px;
+            margin-bottom: -1px;
+        }
+
+        /* ── Pages/Sections ── */
+        .page-tab {
+            display: none;
+            animation: fadeIn 0.4s ease forwards;
+        }
+        .page-tab.active { display: block; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .panel {
+            border-radius:24px;
+            background:var(--glass);
+            backdrop-filter:blur(14px);
+            border:1px solid var(--border);
+            padding:24px;
+            margin-bottom: 24px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 14px;
+            margin-bottom: 20px;
+        }
+
+        .panel-title {
+            font-size:1.15rem;
+            font-weight:700;
+            color:#FFE082;
+            display:flex;
+            align-items:center;
+            gap:10px;
+        }
+
+        .export-btn {
+            padding: 8px 18px;
+            border-radius: 20px;
+            background: linear-gradient(105deg,#FFE082,#FFB347);
+            color: #1a1200;
+            border: none;
+            font-size: 0.82rem;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 4px 14px rgba(255,160,60,0.25);
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .export-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(255,160,60,0.4); }
+
+        /* ── Overview Layout ── */
+        .graphs-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+            gap: 24px;
+        }
+
+        .graph-card {
+            background: rgba(14,14,32,0.7);
+            border-radius: 22px;
+            border: 1px solid var(--border);
+            padding: 22px;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.25s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .graph-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(255,215,0,0.35);
+            box-shadow: 0 16px 36px rgba(0,0,0,0.45);
+        }
+
+        .graph-card h4 {
+            color: #FFE082;
+            margin-bottom: 14px;
+            font-size: 1.05rem;
+            border-bottom: 1px dashed rgba(255,255,255,0.08);
+            padding-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .img-wrapper {
+            background: #fff;
+            border-radius: 14px;
+            padding: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 240px;
+            cursor: zoom-in;
+            position: relative;
+        }
+
+        .img-wrapper img {
+            max-width: 100%;
+            max-height: 280px;
+            object-fit: contain;
+            border-radius: 8px;
+            transition: transform 0.3s;
+        }
+
+        .img-wrapper:hover img { transform: scale(1.02); }
+
+        .img-wrapper::after {
+            content: "🔍 Click to Zoom";
+            position: absolute;
+            bottom: 12px; right: 12px;
+            background: rgba(0,0,0,0.65);
+            color: #fff;
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-size: 0.72rem;
+            font-weight: 600;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        .img-wrapper:hover::after { opacity: 1; }
+
+        .graph-desc {
+            font-size: 0.82rem;
+            color: var(--muted);
+            margin-top: 14px;
+            line-height: 1.5;
+        }
+
+        /* ── Detail Page Layouts ── */
+        .detail-layout {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            gap: 28px;
+        }
+
+        @media(max-width: 960px) {
+            .detail-layout { grid-template-columns: 1fr; }
+        }
+
+        .big-img-container {
+            background: #fff;
+            border-radius: 20px;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.06);
+            border: 1px solid var(--border);
+        }
+        .big-img-container img {
+            max-width: 100%;
+            height: auto;
+            max-height: 480px;
+            border-radius: 12px;
+        }
+
+        .detail-info {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .info-card {
+            background: rgba(255,255,255,0.03);
+            border-radius: 18px;
+            border: 1px solid var(--border);
+            padding: 20px;
+        }
+
+        .info-card h5 {
+            font-size: 0.95rem;
+            color: var(--gold);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .info-card p {
+            font-size: 0.88rem;
+            color: var(--muted);
+            line-height: 1.6;
+        }
+
+        .metric-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-size: 0.76rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-right: 6px;
+            margin-top: 6px;
+        }
+        .mb-tp { background: rgba(46, 204, 113, 0.15); color: var(--success); border: 1px solid rgba(46, 204, 113, 0.3); }
+        .mb-tn { background: rgba(52, 152, 219, 0.15); color: #3498db; border: 1px solid rgba(52, 152, 219, 0.3); }
+        .mb-fp { background: rgba(230, 126, 34, 0.15); color: #e67e22; border: 1px solid rgba(230, 126, 34, 0.3); }
+        .mb-fn { background: rgba(231, 76, 60, 0.15); color: var(--danger); border: 1px solid rgba(231, 76, 60, 0.3); }
+
+        /* Vocabulary Lists */
+        .vocab-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-top: 10px;
+        }
+        .vocab-col {
+            background: rgba(0,0,0,0.2);
+            border-radius: 12px;
+            padding: 14px;
+            border: 1px solid rgba(255,255,255,0.04);
+        }
+        .vocab-col h6 { font-size: 0.85rem; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+        .vocab-tokens { display: flex; flex-wrap: wrap; gap: 6px; }
+        .v-tok {
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 0.78rem;
+            font-weight: 600;
+        }
+        .v-pos { background: rgba(46, 204, 113, 0.14); color: #7ee8a2; border: 1px solid rgba(46, 204, 113, 0.2); }
+        .v-neg { background: rgba(231, 76, 60, 0.14); color: #ff8a80; border: 1px solid rgba(231, 76, 60, 0.2); }
+
+        /* ── Model Specs Table ── */
+        .specs-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 14px;
+        }
+        .specs-table th, .specs-table td {
+            padding: 14px 18px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.9rem;
+        }
+        .specs-table th {
+            color: var(--gold);
+            font-weight: 700;
+            background: rgba(255,255,255,0.02);
+        }
+        .specs-table tr:hover td {
+            background: rgba(255,255,255,0.02);
+            color: white;
+        }
+
+        /* ── Modal Lightbox ── */
+        .modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(6, 6, 14, 0.85);
+            backdrop-filter: blur(12px);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            animation: fadeInModal 0.25s ease forwards;
+        }
+
+        @keyframes fadeInModal {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-card {
+            background: rgba(18,18,34,0.95);
+            border-radius: 28px;
+            border: 1px solid rgba(255,255,255,0.18);
+            width: min(95vw, 920px);
+            max-height: 90vh;
+            display: grid;
+            grid-template-columns: 1.3fr 1fr;
+            overflow: hidden;
+            box-shadow: 0 30px 70px rgba(0,0,0,0.8);
+            position: relative;
+            transform: scale(0.95);
+            animation: scaleUpModal 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.1) forwards;
+        }
+
+        @keyframes scaleUpModal {
+            to { transform: scale(1); }
+        }
+
+        @media(max-width: 800px) {
+            .modal-card { grid-template-columns: 1fr; overflow-y: auto; }
+        }
+
+        .modal-left {
+            background: #fff;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-right: 1px solid var(--border);
+        }
+        .modal-left img { max-width: 100%; max-height: 500px; object-fit: contain; }
+
+        .modal-right {
+            padding: 28px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            overflow-y: auto;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 16px; right: 16px;
+            width: 32px; height: 32px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: #fff;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            z-index: 10;
+            transition: all 0.2s;
+        }
+        .modal-close:hover { background: rgba(255,255,255,0.2); transform: rotate(90deg); }
+
+        .modal-right h4 { font-size: 1.25rem; color: var(--gold); margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
+        .modal-right p { font-size: 0.88rem; color: var(--muted); line-height: 1.6; margin-bottom: 16px; }
+
+        .hamburger { display:none; background:none; border:none; font-size:1.4rem; cursor:pointer; color:var(--text); }
+
+        /* ── Responsive ── */
+        @media(max-width:680px) {
+            .sidebar { transform:translateX(-100%); }
+            .sidebar.open { transform:translateX(0); }
+            .main { margin-left:0; width: 100%; }
+            .hamburger { display:block; }
+            .content-area { padding:20px 16px; }
+            .topbar { padding:14px 16px; }
+        }
+
+        /* ── Print Styles ── */
+        @media print {
+            body { background: #fff !important; color: #000 !important; }
+            .sidebar, .topbar, .tab-bar, .modal, .export-btn, .hamburger { display: none !important; }
+            .main { margin-left: 0 !important; width: 100% !important; }
+            .page-tab { display: block !important; opacity: 1 !important; transform: none !important; }
+            .panel { border: 1px solid #ccc !important; background: #fff !important; color: #000 !important; box-shadow: none !important; margin-bottom: 30px !important; page-break-inside: avoid; }
+            .panel-title { color: #000 !important; border-bottom: 2px solid #333 !important; }
+            .graph-card { border: 1px solid #ddd !important; background: #fff !important; }
+            .graph-card h4 { color: #000 !important; border-bottom: 1px solid #ddd !important; }
+            .graph-card img { filter: none !important; opacity: 1 !important; }
+            .graphs-grid { grid-template-columns: 1fr 1fr !important; }
+            .info-card { border: 1px solid #eee !important; background: #fbfbfb !important; color: #333 !important; }
+            .info-card h5 { color: #000 !important; }
+            .info-card p { color: #555 !important; }
+            .v-tok { border: 1px solid #ccc !important; background: #eee !important; color: #000 !important; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+        <div class="icon">✨</div>
+        <span>Sentiment AI</span>
+    </div>
+    <nav>
+        <div class="nav-label">Main</div>
+        <button class="nav-link" onclick="window.location.href='/dashboard'"><span class="emoji">🏠</span> Dashboard</button>
+        <button class="nav-link active" onclick="window.location.href='/graphs'"><span class="emoji">📊</span> Analytics & Models</button>
+        <div class="nav-label">Manage</div>
+        <button class="nav-link" onclick="window.location.href='/dashboard'"><span class="emoji">📁</span> Projects</button>
+        <button class="nav-link" onclick="window.location.href='/dashboard'"><span class="emoji">⚙️</span> Settings</button>
+    </nav>
+    <div class="sidebar-footer">
+        <button class="logout-btn" id="logoutBtn">🚪 Sign Out</button>
+    </div>
+</aside>
+
+<!-- Main -->
+<div class="main">
+    <!-- Topbar -->
+    <header class="topbar">
+        <div style="display:flex;align-items:center;gap:14px;">
+            <button class="hamburger" id="hamburger">☰</button>
+            <div class="topbar-left">
+                <h2>Model Performance Analytics</h2>
+                <p>Advanced diagnostic metrics and evaluation reports.</p>
+            </div>
+        </div>
+        <div class="topbar-right">
+            <a href="/dashboard" class="back-btn">⬅ Back to Dashboard</a>
+            <div class="avatar" id="userAvatar">U</div>
+        </div>
+    </header>
+
+    <!-- Content Area -->
+    <main class="content-area">
+        <!-- Sub navigation tabs -->
+        <div class="tab-bar">
+            <button class="tab-btn active" data-tab="tab-overview">📊 Summary Overview</button>
+            <button class="tab-btn" data-tab="tab-cm">🎯 Confusion Matrix</button>
+            <button class="tab-btn" data-tab="tab-fi">🔤 Feature Importance</button>
+            <button class="tab-btn" data-tab="tab-roc">📈 ROC & PR Curves</button>
+            <button class="tab-btn" data-tab="tab-specs">📋 Model Diagnostics</button>
+        </div>
+
+        <!-- 1. OVERVIEW SUMMARY TAB -->
+        <div id="tab-overview" class="page-tab active">
+            <div class="panel">
+                <div class="panel-header">
+                    <div class="panel-title">🧠 Performance Charts Directory</div>
+                    <button class="export-btn" onclick="window.print()">📥 Export PDF Report</button>
+                </div>
+                <p style="color:var(--muted); font-size:0.88rem; margin-bottom:20px;">
+                    Select any graph below to inspect high-resolution details, read mathematical explanations, and discover how features influence predictions.
+                </p>
+
+                <div class="graphs-grid">
+                    <!-- Confusion Matrix Card -->
+                    <div class="graph-card">
+                        <h4>Confusion Matrix <span style="font-size:0.75rem; color:var(--success);">Available</span></h4>
+                        <div class="img-wrapper" onclick="openLightbox('confusion_matrix')">
+                            <img id="sum-cm" src="/images/confusion_matrix.png" alt="Confusion Matrix" onerror="this.src='https://via.placeholder.com/400x300?text=Matrix+Not+Yet+Generated'; this.style.opacity='0.45';">
+                        </div>
+                        <p class="graph-desc">
+                            Shows absolute tallies of true vs. false predictions. Indispensable for identifying bias towards specific sentiment classes.
+                        </p>
+                    </div>
+
+                    <!-- Feature Importance Card -->
+                    <div class="graph-card">
+                        <h4>Feature Importance <span style="font-size:0.75rem; color:var(--success);">Available</span></h4>
+                        <div class="img-wrapper" onclick="openLightbox('feature_importance')">
+                            <img id="sum-fi" src="/images/feature_importance.png" alt="Feature Importance" onerror="this.src='https://via.placeholder.com/400x300?text=Feature+Importance+Not+Generated'; this.style.opacity='0.45';">
+                        </div>
+                        <p class="graph-desc">
+                            Displays top vocabulary coefficients. Highlights exactly which keywords trigger positive or negative sentiment predictions.
+                        </p>
+                    </div>
+
+                    <!-- ROC Curve Card -->
+                    <div class="graph-card">
+                        <h4>ROC Curve <span style="font-size:0.75rem; color:var(--success);">Available</span></h4>
+                        <div class="img-wrapper" onclick="openLightbox('roc_curve')">
+                            <img id="sum-roc" src="/images/roc_curve.png" alt="ROC Curve" onerror="this.src='https://via.placeholder.com/400x300?text=Run+pipeline.py+To+Generate+ROC'; this.style.opacity='0.45';">
+                        </div>
+                        <p class="graph-desc">
+                            Measures True Positive Rate vs. False Positive Rate across all decision thresholds. Higher AUC indicates superior class separation.
+                        </p>
+                    </div>
+
+                    <!-- Sentiment Distribution Card -->
+                    <div class="graph-card">
+                        <h4>Sentiment Distribution <span style="font-size:0.75rem; color:rgba(255,215,0,0.6);">Optional</span></h4>
+                        <div class="img-wrapper" onclick="openLightbox('sentiment_distribution')">
+                            <img id="sum-dist" src="/images/sentiment_distribution.png" alt="Sentiment Distribution" onerror="this.src='https://via.placeholder.com/400x300?text=Standard+Distribution+Plot'; this.style.opacity='0.45';">
+                        </div>
+                        <p class="graph-desc">
+                            Visualizes ratios of positive and negative classes in training dataset. Crucial for assessing dataset balance.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. CONFUSION MATRIX TAB -->
+        <div id="tab-cm" class="page-tab">
+            <div class="panel">
+                <div class="panel-header">
+                    <div class="panel-title">🎯 Detailed Confusion Matrix Analysis</div>
+                    <button class="export-btn" onclick="window.print()">📥 Export Section</button>
+                </div>
+
+                <div class="detail-layout">
+                    <div class="big-img-container">
+                        <img src="/images/confusion_matrix.png" alt="Confusion Matrix Detail" onerror="this.src='https://via.placeholder.com/500x380?text=Matrix+Not+Found';">
+                    </div>
+                    <div class="detail-info">
+                        <div class="info-card">
+                            <h5>📊 Understanding Matrix Subdivisions</h5>
+                            <p>
+                                The Confusion Matrix divides our model's test predictions into four key quadrants:
+                            </p>
+                            <div style="margin-top: 12px;">
+                                <span class="metric-badge mb-tp">True Positives (TP)</span> Correct positive reviews.<br>
+                                <span class="metric-badge mb-tn">True Negatives (TN)</span> Correct negative reviews.<br>
+                                <span class="metric-badge mb-fp">False Positives (FP)</span> Negative reviews predicted as Positive.<br>
+                                <span class="metric-badge mb-fn">False Negatives (FN)</span> Positive reviews predicted as Negative.
+                            </div>
+                        </div>
+
+                        <div class="info-card">
+                            <h5>🔍 Diagnostic Insights</h5>
+                            <p>
+                                If your model contains high numbers of <strong>False Positives</strong>, it is overly optimistic, misclassifying complaints as praises. If it exhibits high <strong>False Negatives</strong>, it is missing customer appreciation. Balanced diagonals show a highly stable classifier.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. FEATURE IMPORTANCE TAB -->
+        <div id="tab-fi" class="page-tab">
+            <div class="panel">
+                <div class="panel-header">
+                    <div class="panel-title">🔤 Feature Coefficients & Token Weights</div>
+                    <button class="export-btn" onclick="window.print()">📥 Export Section</button>
+                </div>
+
+                <div class="detail-layout">
+                    <div class="big-img-container">
+                        <img src="/images/feature_importance.png" alt="Feature Importance Detail" onerror="this.src='https://via.placeholder.com/500x380?text=Feature+Importance+Not+Found';">
+                    </div>
+                    <div class="detail-info">
+                        <div class="info-card">
+                            <h5>📝 Model NLP Vocabularies</h5>
+                            <p>
+                                Below are the typical top tokens extracted by our vectorizer that drive class decisions:
+                            </p>
+                            <div class="vocab-grid">
+                                <div class="vocab-col">
+                                    <h6 style="color:#7ee8a2;">😊 Positive Features</h6>
+                                    <div class="vocab-tokens">
+                                        <span class="v-tok v-pos">love</span>
+                                        <span class="v-tok v-pos">perfect</span>
+                                        <span class="v-tok v-pos">excellent</span>
+                                        <span class="v-tok v-pos">great</span>
+                                        <span class="v-tok v-pos">recommend</span>
+                                        <span class="v-tok v-pos">best</span>
+                                        <span class="v-tok v-pos">amazing</span>
+                                    </div>
+                                </div>
+                                <div class="vocab-col">
+                                    <h6 style="color:#ff8a80;">😞 Negative Features</h6>
+                                    <div class="vocab-tokens">
+                                        <span class="v-tok v-neg">terrible</span>
+                                        <span class="v-tok v-neg">waste</span>
+                                        <span class="v-tok v-neg">worst</span>
+                                        <span class="v-tok v-neg">disappointed</span>
+                                        <span class="v-tok v-neg">poor</span>
+                                        <span class="v-tok v-neg">broken</span>
+                                        <span class="v-tok v-neg">useless</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="info-card">
+                            <h5>💡 How it Works</h5>
+                            <p>
+                                The <strong>TF-IDF Vectorizer</strong> maps terms to numerical vectors. The classifier then assigns positive or negative multiplier coefficients to each word. When a new review is classified, the sum of product weights determines the final sentiment confidence.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. ROC & PR CURVES TAB -->
+        <div id="tab-roc" class="page-tab">
+            <div class="panel">
+                <div class="panel-header">
+                    <div class="panel-title">📈 Receiver Operating Characteristic & Sensitivity</div>
+                    <button class="export-btn" onclick="window.print()">📥 Export Section</button>
+                </div>
+
+                <div class="detail-layout">
+                    <div class="big-img-container">
+                        <img src="/images/roc_curve.png" alt="ROC Curve Detail" onerror="this.src='https://via.placeholder.com/500x380?text=ROC+Curve+Not+Found.+Run+run_pipeline.py';">
+                    </div>
+                    <div class="detail-info">
+                        <div class="info-card">
+                            <h5>🎯 Area Under Curve (AUC)</h5>
+                            <p>
+                                The **ROC AUC** (Area Under the Receiver Operating Characteristic) represents the probability that our NLP classifier ranks a random positive feedback higher than a random negative one.
+                            </p>
+                            <p style="margin-top:10px;">
+                                * **0.90 - 1.00**: Outstanding separation.
+                                * **0.70 - 0.90**: Good/Excellent classifier.
+                                * **0.50**: Completely random classification.
+                            </p>
+                        </div>
+
+                        <div class="info-card">
+                            <h5>🎯 Precision-Recall Utility</h5>
+                            <p>
+                                While ROC curves are ideal for balanced datasets, a **Precision-Recall Curve** (PR Curve) is much more robust for highly skewed datasets (e.g. 95% positive customer reviews, 5% complaints) since it focuses specifically on the minority class performance.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. MODEL SPECS TAB -->
+        <div id="tab-specs" class="page-tab">
+            <div class="panel">
+                <div class="panel-header">
+                    <div class="panel-title">📋 Model Diagnostic Settings & Statistics</div>
+                    <button class="export-btn" onclick="window.print()">📥 Print Report</button>
+                </div>
+                <p style="color:var(--muted); font-size:0.88rem; margin-bottom:14px;">
+                    Diagnostic breakdown parsed from active `metrics.json` configurations.
+                </p>
+
+                <table class="specs-table">
+                    <thead>
+                        <tr>
+                            <th>Specification Metric</th>
+                            <th>Current Setting / Value</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Model Architecture</strong></td>
+                            <td id="specModel">Decision Tree Classifier (dt)</td>
+                            <td>Algorithm used for vector classification.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Vectorizer Format</strong></td>
+                            <td>TF-IDF (Term Frequency - Inverse Doc Freq)</td>
+                            <td>Words scaled based on usage rarity.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Validation Strategy</strong></td>
+                            <td>5-Fold Stratified Cross Validation</td>
+                            <td>Folds maintain class distribution ratios.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Text Preprocessing</strong></td>
+                            <td>Lowercase, Stopword Removal</td>
+                            <td>Cleans punctuation and auxiliary terms.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Dataset Sample Size</strong></td>
+                            <td>30 Customer Reviews</td>
+                            <td>Total samples in active `customer_reviews.csv`.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Evaluation Split Ratio</strong></td>
+                            <td>80% Train / 20% Test</td>
+                            <td>Data split used for independent validation.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- Lightbox Modal -->
+<div class="modal" id="lightbox">
+    <div class="modal-card">
+        <button class="modal-close" onclick="closeLightbox()">&times;</button>
+        <div class="modal-left">
+            <img id="modalImg" src="" alt="Zoomed Graph">
+        </div>
+        <div class="modal-right">
+            <div>
+                <h4 id="modalTitle">Performance Metric</h4>
+                <p id="modalBody">Description goes here.</p>
+            </div>
+            <button class="export-btn" style="align-self: flex-start;" onclick="window.print()">📥 Export Graphic</button>
+        </div>
+    </div>
+</div>
+
+<script>
+(function() {
+    // SPA navigation within Graphs Page
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const pageTabs = document.querySelectorAll('.page-tab');
+
+    tabBtns.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            tabBtns.forEach(b => b.classList.remove('active'));
+            pageTabs.forEach(t => t.classList.remove('active'));
+
+            e.currentTarget.classList.add('active');
+            const tabId = e.currentTarget.getAttribute('data-tab');
+            document.getElementById(tabId).classList.add('active');
+        });
+    });
+
+    // Mobile Hamburger
+    const hamburger = document.getElementById("hamburger");
+    const sidebar = document.getElementById("sidebar");
+    if (hamburger && sidebar) {
+        hamburger.addEventListener("click", () => {
+            sidebar.classList.toggle("open");
+        });
+    }
+
+    // Set Welcome User Name
+    let user = null;
+    try {
+        user = JSON.parse(sessionStorage.getItem("currentUser"));
+    } catch(e){}
+    if (user) {
+        document.getElementById("userAvatar").textContent = user.name.charAt(0).toUpperCase();
+    }
+
+    // Sign Out
+    document.getElementById("logoutBtn").addEventListener("click", async () => {
+        try { await fetch('/logout', { method: 'POST' }); } catch(e){}
+        sessionStorage.removeItem("currentUser");
+        window.location.href = "/login";
+    });
+
+    // Lightbox modal logic
+    const lightbox = document.getElementById("lightbox");
+    const modalImg = document.getElementById("modalImg");
+    const modalTitle = document.getElementById("modalTitle");
+    const modalBody = document.getElementById("modalBody");
+
+    const explanations = {
+        'confusion_matrix': {
+            title: "Confusion Matrix",
+            text: "This matrix tracks predicted vs actual sentiment labels. A highly accurate classifier maintains maximum values along the diagonal (from top-left to bottom-right), showing perfect class assignment for positive and negative customer reviews. Any off-diagonal counts signify classification errors."
+        },
+        'feature_importance': {
+            title: "Feature Importance & Coefficients",
+            text: "NLP classifiers identify specific keywords that yield high predictive weights. For instance, words like 'terrible' or 'waste' will have high negative weights, whereas 'love' or 'excellent' will receive strong positive weights. Feature importance shows how highly the model values these features."
+        },
+        'roc_curve': {
+            title: "ROC Curve (Sensitivity vs. Specificity)",
+            text: "The Receiver Operating Characteristic (ROC) curve evaluates our model across all possible probability cutoffs. The Area Under the Curve (AUC) ranges from 0.5 (random guessing) to 1.0 (perfect prediction). A high curve represents robust classification confidence."
+        },
+        'sentiment_distribution': {
+            title: "Sentiment Ratios",
+            text: "This visualization graphs the dataset balance. If positive customer ratings overwhelmingly dominate complaints, classifiers might gain bias towards positive answers. Balanced datasets lead to the most accurate models."
+        }
+    };
+
+    window.openLightbox = function(key) {
+        const expl = explanations[key];
+        if (!expl) return;
+
+        modalImg.src = "/images/" + key + ".png";
+        modalTitle.textContent = expl.title;
+        modalBody.textContent = expl.text;
+
+        lightbox.style.display = "flex";
+    };
+
+    window.closeLightbox = function() {
+        lightbox.style.display = "none";
+    };
+
+    // Auto-detect which model was run based on reports folder
+    async function checkModelSpecs() {
+        try {
+            const res = await fetch('/stats');
+            if (res.ok) {
+                // optional: pull additional info to dynamically set diagnostic logs
+            }
+        } catch(e){}
+    }
+    checkModelSpecs();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+    <title>Login | Sign In</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', system-ui, sans-serif; }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background:
+                radial-gradient(circle at 75% 20%, rgba(255, 215, 0, 0.16), transparent 25%),
+                radial-gradient(circle at 20% 70%, rgba(255, 255, 255, 0.06), transparent 20%),
+                radial-gradient(circle at 55% 90%, rgba(255, 180, 0, 0.1), transparent 22%),
+                linear-gradient(135deg, #06060a, #0e0e1a 50%, #080810);
+            padding: 24px;
+            overflow: hidden;
+        }
+
+        /* Animated orb background */
+        .orb {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(80px);
+            pointer-events: none;
+            z-index: 0;
+            animation: orbDrift 14s ease-in-out infinite alternate;
+        }
+        .orb1 { width: 340px; height: 340px; background: rgba(255, 200, 0, 0.09); top: -80px; left: -80px; animation-delay: 0s; }
+        .orb2 { width: 260px; height: 260px; background: rgba(255, 120, 0, 0.07); bottom: -60px; right: -60px; animation-delay: -5s; }
+        .orb3 { width: 200px; height: 200px; background: rgba(200, 150, 255, 0.05); top: 40%; left: 60%; animation-delay: -9s; }
+
+        @keyframes orbDrift {
+            from { transform: translate(0, 0) scale(1); }
+            to   { transform: translate(30px, 20px) scale(1.08); }
+        }
+
+        /* Particle dots */
+        .particles { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+        .dot {
+            position: absolute;
+            width: 2px; height: 2px;
+            border-radius: 50%;
+            background: rgba(255,215,0,0.4);
+            animation: twinkle 4s ease-in-out infinite;
+        }
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.2; transform: scale(1); }
+            50% { opacity: 0.8; transform: scale(1.5); }
+        }
+
+        .card {
+            position: relative;
+            z-index: 10;
+            width: min(92vw, 420px);
+            padding: 42px 34px 46px;
+            border-radius: 40px;
+            background: rgba(18, 18, 32, 0.62);
+            backdrop-filter: blur(22px);
+            -webkit-backdrop-filter: blur(22px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow:
+                0 30px 60px rgba(0, 0, 0, 0.6),
+                0 0 0 1px rgba(255, 215, 0, 0.1) inset,
+                0 1px 0 rgba(255, 255, 255, 0.08) inset;
+            text-align: center;
+            color: #fff;
+            animation: cardIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+        }
+
+        @keyframes cardIn {
+            from { opacity: 0; transform: translateY(24px) scale(0.97); }
+            to   { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .logo {
+            width: 64px;
+            height: 64px;
+            border-radius: 20px;
+            background: linear-gradient(135deg, #FFD700, #FF8C00);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            margin: 0 auto 20px;
+            box-shadow: 0 8px 24px rgba(255, 160, 0, 0.45);
+            animation: logoPop 0.6s 0.2s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+        }
+
+        @keyframes logoPop {
+            from { transform: scale(0.6) rotate(-10deg); opacity: 0; }
+            to   { transform: scale(1) rotate(0deg); opacity: 1; }
+        }
+
+        h1 {
+            font-size: 2rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #FFFDE7, #FFE082, #FFB347);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            margin-bottom: 6px;
+            letter-spacing: -0.5px;
+        }
+
+        .sub {
+            color: rgba(255, 245, 210, 0.65);
+            font-size: 0.87rem;
+            margin-bottom: 8px;
+        }
+
+        .divider {
+            width: 40px;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #FFD700, transparent);
+            margin: 14px auto 28px;
+        }
+
+        .input-group {
+            position: relative;
+            margin: 10px 0;
+        }
+
+        .input-group .icon {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1rem;
+            opacity: 0.55;
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 14px 18px 14px 44px;
+            border: 1.5px solid rgba(255, 255, 255, 0.12);
+            outline: none;
+            border-radius: 34px;
+            background: rgba(8, 8, 20, 0.65);
+            color: #fef9e6;
+            font-size: 0.93rem;
+            font-weight: 500;
+            transition: all 0.25s;
+        }
+
+        .input-group input:focus {
+            border-color: #FFD700;
+            background: rgba(18, 18, 36, 0.9);
+            box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.18), 0 4px 16px rgba(0,0,0,0.3);
+            transform: translateY(-1px);
+        }
+
+        .input-group input::placeholder { color: rgba(240, 230, 200, 0.45); }
+
+        .forgot-row {
+            display: flex;
+            justify-content: flex-end;
+            margin: 8px 4px 0;
+        }
+
+        .forgot-row a {
+            color: rgba(255, 215, 0, 0.7);
+            font-size: 0.78rem;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .forgot-row a:hover { color: #FFD700; }
+
+        .btn {
+            width: 100%;
+            margin-top: 22px;
+            padding: 15px;
+            border: none;
+            border-radius: 44px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 700;
+            color: #1a1200;
+            background: linear-gradient(105deg, #FFE082, #FFB347);
+            box-shadow: 0 8px 24px rgba(255, 160, 60, 0.38);
+            transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s;
+            letter-spacing: 0.2px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(rgba(255,255,255,0.15), transparent);
+            border-radius: inherit;
+        }
+
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 14px 32px rgba(255,160,60,0.55); filter: brightness(1.06); }
+        .btn:active { transform: translateY(1px); }
+        .btn:disabled { opacity: 0.65; transform: none; cursor: wait; }
+
+        #message {
+            margin-top: 18px;
+            font-size: 0.88rem;
+            font-weight: 600;
+            min-height: 40px;
+            padding: 8px 14px;
+            border-radius: 40px;
+            background: rgba(0,0,0,0.25);
+            backdrop-filter: blur(4px);
+            transition: all 0.3s;
+        }
+
+        .success { color: #B2FF9E; }
+        .error   { color: #FFB3B3; }
+
+        .footer-link {
+            margin-top: 24px;
+            color: rgba(255, 245, 210, 0.55);
+            font-size: 0.82rem;
+        }
+
+        .footer-link a {
+            color: #FFD700;
+            font-weight: 600;
+            text-decoration: none;
+            transition: opacity 0.2s;
+        }
+
+        .footer-link a:hover { opacity: 0.8; text-decoration: underline; }
+
+        @media (max-width: 480px) {
+            .card { padding: 32px 22px 38px; }
+            h1 { font-size: 1.75rem; }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Background elements -->
+    <div class="orb orb1"></div>
+    <div class="orb orb2"></div>
+    <div class="orb orb3"></div>
+    <div class="particles" id="particles"></div>
+
+    <div class="card">
+        <div class="logo">🔑</div>
+        <h1>Welcome Back</h1>
+        <p class="sub">Sign in to your account</p>
+        <div class="divider"></div>
+
+        <form id="loginForm" novalidate>
+            <div class="input-group">
+                <span class="icon">📧</span>
+                <input type="email" id="loginEmail" placeholder="Email address" autocomplete="email" required />
+            </div>
+            <div class="input-group">
+                <span class="icon">🔒</span>
+                <input type="password" id="loginPassword" placeholder="Password" autocomplete="current-password" required />
+            </div>
+            <div class="forgot-row"><a href="#">Forgot password?</a></div>
+            <button class="btn" type="submit" id="loginBtn">🚀 Sign In</button>
+        </form>
+
+        <div id="message"></div>
+        <div class="footer-link">Don't have an account? <a href="/">Register →</a></div>
+    </div>
+
+    <script>
+    // Generate particle dots
+    (function() {
+        const container = document.getElementById("particles");
+        for (let i = 0; i < 28; i++) {
+            const dot = document.createElement("div");
+            dot.className = "dot";
+            dot.style.left = Math.random() * 100 + "%";
+            dot.style.top  = Math.random() * 100 + "%";
+            dot.style.animationDelay = (Math.random() * 4) + "s";
+            dot.style.animationDuration = (3 + Math.random() * 3) + "s";
+            container.appendChild(dot);
+        }
+    })();
+
+    (function () {
+        const form = document.getElementById("loginForm");
+        const messageDiv = document.getElementById("message");
+        const loginBtn = document.getElementById("loginBtn");
+        let isProcessing = false;
+
+        function showMessage(text, type) {
+            messageDiv.textContent = text;
+            messageDiv.className = type;
+            if (type === "error") {
+                clearTimeout(window._msgTimeout);
+                window._msgTimeout = setTimeout(() => { if (messageDiv.className === "error") messageDiv.textContent = ""; }, 4500);
+            }
+        }
+
+        form.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            if (isProcessing) return;
+
+            const email    = document.getElementById("loginEmail").value.trim();
+            const password = document.getElementById("loginPassword").value;
+
+            if (!email || !password) return showMessage("⚠️ Please fill in all fields.", "error");
+            if (!/^[^\s@]+@([^\s@]+\.)+[^\s@]+$/.test(email)) return showMessage("📧 Enter a valid email address.", "error");
+
+            isProcessing = true;
+            loginBtn.disabled = true;
+            loginBtn.textContent = "Signing in...";
+
+            try {
+                // Post credentials to backend SQLite auth
+                const response = await fetch('/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: email, password: password })
+                });
+
+                const resData = await response.json();
+
+                if (response.ok) {
+                    sessionStorage.setItem("currentUser", JSON.stringify({ name: email.split('@')[0], email: email }));
+                    showMessage("✅ Login successful! Redirecting...", "success");
+                    loginBtn.textContent = "✓ Redirecting...";
+                    setTimeout(() => { window.location.href = "/dashboard"; }, 1500);
+                } else {
+                    showMessage("❌ " + (resData.error || "Invalid email or password."), "error");
+                    loginBtn.disabled = false;
+                    loginBtn.textContent = "🚀 Sign In";
+                    isProcessing = false;
+                }
+            } catch (err) {
+                console.error("Backend login failed, fallback to local storage...", err);
+                
+                // Fallback client-side authentication
+                const users = JSON.parse(localStorage.getItem("users") || "[]");
+                const user = users.find(u => u.email === email && u.password === password);
+
+                if (user) {
+                    sessionStorage.setItem("currentUser", JSON.stringify({ name: user.name, email: user.email }));
+                    showMessage("✅ Local login successful! Redirecting...", "success");
+                    loginBtn.textContent = "✓ Redirecting...";
+                    setTimeout(() => { window.location.href = "/dashboard"; }, 1500);
+                } else {
+                    showMessage("❌ Invalid email or password (Local Check).", "error");
+                    loginBtn.disabled = false;
+                    loginBtn.textContent = "🚀 Sign In";
+                    isProcessing = false;
+                }
+            }
+        });
+    })();
+    </script>
+</body>
+</html>

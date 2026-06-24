@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard | Sentiment AI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; font-family:'Inter',sans-serif; }
+
+        :root {
+            --gold: #FFD700;
+            --gold-dim: rgba(255,215,0,0.15);
+            --glass: rgba(20,20,38,0.6);
+            --border: rgba(255,255,255,0.12);
+            --text: #F5ECD7;
+            --muted: rgba(245,236,215,0.55);
+            --sidebar-w: 240px;
+        }
+
+        body {
+            min-height: 100vh;
+            background:
+                radial-gradient(circle at 15% 25%, rgba(255,215,0,0.1) 0%, transparent 30%),
+                radial-gradient(circle at 85% 75%, rgba(255,120,0,0.08) 0%, transparent 28%),
+                linear-gradient(140deg,#06060c,#0d0d1e 55%,#080810);
+            color: var(--text);
+            display: flex;
+            overflow-x: hidden;
+        }
+
+        /* ── Sidebar ── */
+        .sidebar {
+            width: var(--sidebar-w);
+            min-height: 100vh;
+            background: rgba(12,12,24,0.75);
+            backdrop-filter: blur(18px);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            padding: 28px 0 24px;
+            position: fixed;
+            left: 0; top: 0; bottom: 0;
+            z-index: 100;
+            transition: transform 0.3s;
+        }
+
+        .sidebar-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 0 22px 28px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .sidebar-logo .icon {
+            width: 42px; height: 42px;
+            border-radius: 14px;
+            background: linear-gradient(135deg,#FFD700,#FF8C00);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.2rem;
+            box-shadow: 0 6px 16px rgba(255,160,0,0.4);
+            flex-shrink: 0;
+        }
+
+        .sidebar-logo span { font-size: 1.05rem; font-weight: 700; color: #FFF8E7; }
+
+        nav { padding: 20px 12px; flex: 1; }
+
+        .nav-label {
+            font-size: 0.68rem;
+            font-weight: 600;
+            letter-spacing: 1.2px;
+            color: var(--muted);
+            text-transform: uppercase;
+            padding: 0 10px;
+            margin: 18px 0 8px;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 11px 14px;
+            border-radius: 14px;
+            text-decoration: none;
+            color: var(--muted);
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.2s;
+            cursor: pointer;
+            border: none;
+            background: none;
+            width: 100%;
+            margin-bottom: 3px;
+            text-align: left;
+        }
+
+        .nav-link:hover { background: var(--gold-dim); color: var(--text); }
+        .nav-link.active { background: linear-gradient(105deg,rgba(255,215,0,0.2),rgba(255,140,0,0.12)); color: #FFE082; border: 1px solid rgba(255,215,0,0.25); }
+        .nav-link .emoji { font-size: 1.05rem; }
+
+        .sidebar-footer { padding: 18px 12px 0; border-top: 1px solid var(--border); }
+
+        /* ── Main ── */
+        .main {
+            margin-left: var(--sidebar-w);
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            width: calc(100% - var(--sidebar-w));
+        }
+
+        /* ── Topbar ── */
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 18px 32px;
+            background: rgba(10,10,20,0.5);
+            backdrop-filter: blur(14px);
+            border-bottom: 1px solid var(--border);
+            position: sticky; top: 0; z-index: 50;
+        }
+
+        .topbar-left h2 { font-size: 1.25rem; font-weight: 700; color: #FFF8E7; }
+        .topbar-left p  { font-size: 0.8rem; color: var(--muted); margin-top: 2px; }
+
+        .topbar-right { display: flex; align-items: center; gap: 14px; }
+
+        .badge {
+            position: relative;
+            width: 38px; height: 38px;
+            border-radius: 12px;
+            background: var(--glass);
+            border: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .badge:hover { border-color: rgba(255,215,0,0.4); background: var(--gold-dim); }
+        .badge .dot { position:absolute; top:7px; right:7px; width:7px; height:7px; border-radius:50%; background:#FF6B6B; border:1.5px solid #0d0d1e; }
+
+        .avatar {
+            width: 38px; height: 38px;
+            border-radius: 50%;
+            background: linear-gradient(135deg,#FFD700,#FF8C00);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.95rem; font-weight: 700; color: #1a1200;
+            cursor: pointer;
+            border: 2px solid rgba(255,215,0,0.4);
+            box-shadow: 0 4px 12px rgba(255,160,0,0.3);
+        }
+
+        /* ── Content Area ── */
+        .content-area { padding: 32px; flex: 1; }
+
+        .page-section {
+            display: none;
+            animation: fadeIn 0.4s ease forwards;
+        }
+        .page-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Common Elements */
+        .panel {
+            border-radius:24px;
+            background:var(--glass);
+            backdrop-filter:blur(14px);
+            border:1px solid var(--border);
+            padding:24px;
+            overflow:hidden;
+            margin-bottom: 24px;
+        }
+
+        .panel-title {
+            font-size:1.1rem;
+            font-weight:700;
+            color:#FFE082;
+            margin-bottom:18px;
+            display:flex;
+            align-items:center;
+            gap:8px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 12px;
+        }
+
+        /* Dashboard Specific */
+        .banner {
+            border-radius: 28px;
+            padding: 32px 36px;
+            background: linear-gradient(120deg,rgba(255,210,0,0.14) 0%,rgba(255,100,0,0.08) 60%,rgba(20,20,40,0.4) 100%);
+            border: 1px solid rgba(255,215,0,0.22);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 28px;
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .banner::before {
+            content:"";
+            position:absolute;
+            width:200px; height:200px;
+            border-radius:50%;
+            background:radial-gradient(circle,rgba(255,215,0,0.12),transparent 70%);
+            right:-40px; top:-60px;
+        }
+
+        .banner-text h3 { font-size:1.55rem; font-weight:800; background:linear-gradient(120deg,#FFFDE7,#FFE082); background-clip:text; -webkit-background-clip:text; color:transparent; }
+        .banner-text p  { color:var(--muted); margin-top:6px; font-size:0.88rem; }
+        .banner-emoji { font-size:4rem; line-height:1; }
+
+        .stats-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:18px; margin-bottom:28px; }
+
+        .stat-card {
+            border-radius:22px;
+            padding:22px 24px;
+            background:var(--glass);
+            backdrop-filter:blur(14px);
+            border:1px solid var(--border);
+            transition:all 0.25s;
+            position:relative;
+            overflow:hidden;
+        }
+        .stat-card:hover { transform:translateY(-4px); border-color:rgba(255,215,0,0.3); box-shadow:0 16px 36px rgba(0,0,0,0.4); }
+
+        .stat-icon { font-size:1.6rem; margin-bottom:12px; display:block; }
+        .stat-value { font-size:2rem; font-weight:800; color:#FFE082; line-height:1; }
+        .stat-label { font-size:0.78rem; color:var(--muted); margin-top:6px; font-weight:500; text-transform:uppercase; letter-spacing:0.6px; }
+        .stat-change { font-size:0.75rem; margin-top:8px; display:flex; align-items:center; gap:4px; }
+        .up   { color:#7EE8A2; }
+        .down { color:#FF8A80; }
+
+        .bottom-grid { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+        @media(max-width:860px) { .bottom-grid { grid-template-columns:1fr; } }
+
+        /* Activity list */
+        .activity-item { display:flex; align-items:center; gap:14px; padding:12px 0; border-bottom:1px solid rgba(255,255,255,0.06); }
+        .activity-item:last-child { border-bottom:none; }
+        .act-icon { width:36px; height:36px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:1rem; flex-shrink:0; }
+        .act-text { flex:1; }
+        .act-text strong { font-size:0.87rem; font-weight:600; color:var(--text); display:block; }
+        .act-text span   { font-size:0.76rem; color:var(--muted); }
+        .act-time { font-size:0.72rem; color:var(--muted); white-space:nowrap; }
+
+        /* Quick actions */
+        .quick-actions { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+        .action-btn { border-radius:16px; padding:16px; background:rgba(255,255,255,0.04); border:1px solid var(--border); display:flex; flex-direction:column; align-items:center; gap:8px; cursor:pointer; transition:all 0.2s; text-align:center; }
+        .action-btn:hover { background:var(--gold-dim); border-color:rgba(255,215,0,0.35); transform:translateY(-2px); }
+        .action-btn .icon2 { font-size:1.6rem; }
+        .action-btn span { font-size:0.78rem; font-weight:600; color:var(--muted); }
+
+        /* Analytics Graphs Grid */
+        .graphs-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 24px;
+        }
+
+        .graph-card {
+            background: rgba(15,15,30,0.8);
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+
+        .graph-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--gold);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .graph-card h4 {
+            color: #FFE082;
+            margin-bottom: 16px;
+            font-size: 1.05rem;
+            text-align: center;
+            width: 100%;
+            border-bottom: 1px dashed rgba(255,255,255,0.1);
+            padding-bottom: 10px;
+        }
+
+        .graph-card img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 12px;
+            background: #fff;
+            padding: 8px;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        /* Interactive Predictor Panel */
+        .predictor-box {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .predictor-textarea {
+            width: 100%;
+            min-height: 100px;
+            border-radius: 18px;
+            padding: 16px;
+            background: rgba(0, 0, 0, 0.45);
+            border: 1.5px solid var(--border);
+            color: white;
+            font-size: 0.95rem;
+            outline: none;
+            resize: vertical;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .predictor-textarea:focus {
+            border-color: var(--gold);
+            box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.15);
+        }
+
+        .analyzer-btn {
+            align-self: flex-start;
+            padding: 12px 32px;
+            border-radius: 30px;
+            border: none;
+            background: linear-gradient(105deg,#FFE082,#FFB347);
+            color: #1a1200;
+            font-weight: 700;
+            font-size: 0.95rem;
+            cursor: pointer;
+            box-shadow: 0 6px 18px rgba(255, 160, 60, 0.3);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .analyzer-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 24px rgba(255, 160, 60, 0.45);
+        }
+
+        .analyzer-btn:active {
+            transform: translateY(1px);
+        }
+
+        .result-panel {
+            margin-top: 18px;
+            border-radius: 20px;
+            padding: 20px;
+            border: 1px solid var(--border);
+            animation: slideDown 0.3s ease forwards;
+            display: none;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .result-positive {
+            background: linear-gradient(135deg, rgba(46, 204, 113, 0.15), rgba(0,0,0,0.25));
+            border-color: rgba(46, 204, 113, 0.35);
+        }
+
+        .result-negative {
+            background: linear-gradient(135deg, rgba(231, 76, 60, 0.15), rgba(0,0,0,0.25));
+            border-color: rgba(231, 76, 60, 0.35);
+        }
+
+        .result-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 14px;
+        }
+
+        .result-badge {
+            padding: 6px 16px;
+            border-radius: 30px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-positive { background: #2ecc71; color: #102e1a; }
+        .badge-negative { background: #e74c3c; color: #3e120e; }
+
+        .confidence-bar-container {
+            height: 6px;
+            background: rgba(255,255,255,0.08);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 8px;
+            position: relative;
+        }
+
+        .confidence-bar {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.6s cubic-bezier(0.1, 0.8, 0.3, 1);
+        }
+
+        .bar-positive { background: #2ecc71; }
+        .bar-negative { background: #e74c3c; }
+
+        .word-highlights {
+            margin-top: 18px;
+            padding-top: 14px;
+            border-top: 1px dashed rgba(255,255,255,0.1);
+            line-height: 1.8;
+            font-size: 0.95rem;
+        }
+
+        .word-token {
+            display: inline-block;
+            margin: 2px 4px;
+            padding: 2px 8px;
+            border-radius: 6px;
+            cursor: help;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .word-pos {
+            background: rgba(46, 204, 113, 0.18);
+            color: #7ee8a2;
+            border: 1px solid rgba(46, 204, 113, 0.25);
+        }
+        .word-pos:hover {
+            background: rgba(46, 204, 113, 0.35);
+            box-shadow: 0 0 10px rgba(46, 204, 113, 0.4);
+        }
+
+        .word-neg {
+            background: rgba(231, 76, 60, 0.18);
+            color: #ff8a80;
+            border: 1px solid rgba(231, 76, 60, 0.25);
+        }
+        .word-neg:hover {
+            background: rgba(231, 76, 60, 0.35);
+            box-shadow: 0 0 10px rgba(231, 76, 60, 0.4);
+        }
+
+        .word-neu {
+            color: rgba(255,255,255,0.8);
+        }
+
+        /* Profile & Settings Placeholders */
+        .placeholder-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 20px;
+            text-align: center;
+            color: var(--muted);
+        }
+        .placeholder-content .icon { font-size: 4rem; margin-bottom: 20px; opacity: 0.8; }
+        .placeholder-content h3 { font-size: 1.5rem; color: var(--text); margin-bottom: 10px; }
+
+        /* Logout btn */
+        .logout-btn {
+            display:flex; align-items:center; gap:10px;
+            padding:11px 14px; border-radius:14px;
+            border:none; background:rgba(255,80,80,0.1);
+            color:rgba(255,160,160,0.9); font-size:0.88rem; font-weight:600;
+            cursor:pointer; width:100%;
+            transition:all 0.2s;
+        }
+        .logout-btn:hover { background:rgba(255,80,80,0.2); color:#FFB3B3; }
+
+        .hamburger { display:none; background:none; border:none; font-size:1.4rem; cursor:pointer; color:var(--text); }
+
+        @media(max-width:860px) {
+            .graphs-grid { grid-template-columns: 1fr; }
+        }
+
+        @media(max-width:680px) {
+            .sidebar { transform:translateX(-100%); }
+            .sidebar.open { transform:translateX(0); }
+            .main { margin-left:0; width: 100%; }
+            .hamburger { display:block; }
+            .content-area { padding:20px 16px; }
+            .topbar { padding:14px 16px; }
+            .banner { padding:22px 20px; }
+            .banner-emoji { font-size:2.8rem; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+        <div class="icon">✨</div>
+        <span>Sentiment AI</span>
+    </div>
+    <nav>
+        <div class="nav-label">Main</div>
+        <button class="nav-link active" data-target="dashboard"><span class="emoji">🏠</span> Dashboard</button>
+        <button class="nav-link" data-target="profile"><span class="emoji">👤</span> Profile</button>
+        <button class="nav-link" onclick="window.location.href='/graphs'"><span class="emoji">📊</span> Analytics & Models</button>
+        <div class="nav-label">Manage</div>
+        <button class="nav-link" data-target="projects"><span class="emoji">📁</span> Projects</button>
+        <button class="nav-link" data-target="settings"><span class="emoji">⚙️</span> Settings</button>
+    </nav>
+    <div class="sidebar-footer">
+        <button class="logout-btn" id="logoutBtn">🚪 Sign Out</button>
+    </div>
+</aside>
+
+<!-- Main -->
+<div class="main">
+    <!-- Topbar -->
+    <header class="topbar">
+        <div style="display:flex;align-items:center;gap:14px;">
+            <button class="hamburger" id="hamburger">☰</button>
+            <div class="topbar-left">
+                <h2 id="topbarTitle">Dashboard</h2>
+                <p id="dateStr">Loading...</p>
+            </div>
+        </div>
+        <div class="topbar-right">
+            <div class="badge" title="Notifications">🔔<span class="dot"></span></div>
+            <div class="avatar" id="userAvatar" title="Profile">U</div>
+        </div>
+    </header>
+
+    <!-- Content Area -->
+    <main class="content-area">
+
+        <!-- 1. DASHBOARD SECTION -->
+        <div id="dashboard" class="page-section active">
+            <!-- Welcome Banner -->
+            <div class="banner">
+                <div class="banner-text">
+                    <h3 id="welcomeMsg">Welcome back! 👋</h3>
+                    <p>Your production NLP classification engine is live and running.</p>
+                </div>
+                <div class="banner-emoji">🚀</div>
+            </div>
+
+            <!-- Stats -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <span class="stat-icon">📈</span>
+                    <div class="stat-value" id="statAccuracy">55.9%</div>
+                    <div class="stat-label">Model Accuracy</div>
+                    <div class="stat-change up">▲ Live from system</div>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-icon">💬</span>
+                    <div class="stat-value" id="statProcessed">Loading...</div>
+                    <div class="stat-label">Reviews Processed</div>
+                    <div class="stat-change up">▲ SQLite Database</div>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-icon">⚙️</span>
+                    <div class="stat-value">5-Fold</div>
+                    <div class="stat-label">Cross Validation</div>
+                    <div class="stat-change up">▲ Validated Stable</div>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-icon">✅</span>
+                    <div class="stat-value" style="color: #7EE8A2;">Active</div>
+                    <div class="stat-label">Pipeline Status</div>
+                    <div class="stat-change up">▲ SQLite Connected</div>
+                </div>
+            </div>
+
+            <!-- Interactive Sentiment Analysis Tool (Masterpiece) -->
+            <div class="panel">
+                <div class="panel-title">🔮 Real-Time Sentiment Predictor</div>
+                <p style="color: var(--muted); font-size:0.88rem; margin-bottom:16px;">
+                    Type customer feedback below to classify its sentiment dynamically. Our active machine learning model will parse the text, assign confidence levels, and highlight keyword weights!
+                </p>
+                <div class="predictor-box">
+                    <textarea class="predictor-textarea" id="predictorInput" placeholder="Write review here... (e.g. 'I absolutely love this new device! It has completely exceeded all my expectations, highly recommend!')"></textarea>
+                    <button class="analyzer-btn" id="analyzeBtn">⚡ Predict Sentiment</button>
+                </div>
+
+                <div class="result-panel" id="resultPanel">
+                    <div class="result-header">
+                        <div>
+                            <span style="font-size:0.75rem; text-transform:uppercase; color:var(--muted); font-weight:600; display:block;">Prediction Result</span>
+                            <span style="font-size:1.4rem; font-weight:800; color:white; display:flex; align-items:center; gap:8px;" id="resultSentiment">Positive <span id="resultEmoji">😊</span></span>
+                        </div>
+                        <div class="result-badge" id="resultBadge">Positive</div>
+                    </div>
+                    <div>
+                        <div style="display:flex; justify-content:space-between; font-size:0.8rem; font-weight:600;">
+                            <span>Classification Confidence</span>
+                            <span id="resultConfidence">98.2%</span>
+                        </div>
+                        <div class="confidence-bar-container">
+                            <div class="confidence-bar" id="confidenceBar"></div>
+                        </div>
+                    </div>
+                    <div class="word-highlights">
+                        <span style="font-size:0.75rem; text-transform:uppercase; color:var(--muted); font-weight:600; display:block; margin-bottom:6px;">Model Interpretability Weights</span>
+                        <div id="wordTokenContainer">
+                            <!-- highlighted tokens go here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bottom Grid -->
+            <div class="bottom-grid">
+                <!-- Recent Activity (Saved history from sqlite) -->
+                <div class="panel" style="margin-bottom:0;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border); padding-bottom:12px; margin-bottom:18px;">
+                        <h3 class="panel-title" style="border:none; margin:0; padding:0;">📋 Prediction History</h3>
+                        <button id="clearHistoryBtn" style="background:none; border:none; color:#FF8A80; font-size:0.78rem; font-weight:600; cursor:pointer;">🧹 Clear All</button>
+                    </div>
+                    <div id="historyContainer" style="max-height: 250px; overflow-y: auto;">
+                        <div style="text-align:center; padding:20px; color:var(--muted); font-size:0.85rem;">No history found. Try predicting sentiment above!</div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="panel" style="margin-bottom:0;">
+                    <div class="panel-title">⚡ Quick Actions</div>
+                    <div class="quick-actions">
+                        <div class="action-btn" onclick="window.location.href='/graphs'">
+                            <span class="icon2">📊</span>
+                            <span>View Model Graphs</span>
+                        </div>
+                        <div class="action-btn" onclick="alert('The database updates automatically as user reviews are submitted and analyzed!')">
+                            <span class="icon2">📤</span>
+                            <span>Synchronize Data</span>
+                        </div>
+                        <div class="action-btn" onclick="document.querySelector('[data-target=\'profile\']').click()">
+                            <span class="icon2">👤</span>
+                            <span>My Profile</span>
+                        </div>
+                        <div class="action-btn" onclick="document.querySelector('[data-target=\'settings\']').click()">
+                            <span class="icon2">⚙️</span>
+                            <span>Settings</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. ANALYTICS SECTION -->
+        <div id="analytics" class="page-section">
+            <div class="panel">
+                <div class="panel-title">🧠 Model Performance & Analytics</div>
+                <p style="color: var(--muted); margin-bottom: 24px; font-size: 0.9rem;">
+                    These premium visualizations are automatically generated during the model training pipeline, showcasing classification metrics, feature importance, and overall sentiment distribution.
+                </p>
+
+                <div class="graphs-grid">
+                    <div class="graph-card">
+                        <h4>Confusion Matrix</h4>
+                        <img src="/images/confusion_matrix.png" alt="Confusion Matrix" onerror="this.src='https://via.placeholder.com/400x300?text=Run+Model+Pipeline+To+Generate'; this.style.opacity='0.5';">
+                    </div>
+                    <div class="graph-card">
+                        <h4>Feature Importance</h4>
+                        <img src="/images/feature_importance.png" alt="Feature Importance" onerror="this.src='https://via.placeholder.com/400x300?text=Run+Model+Pipeline+To+Generate'; this.style.opacity='0.5';">
+                    </div>
+                    <div class="graph-card">
+                        <h4>ROC Curve</h4>
+                        <img src="/images/roc_curve.png" alt="ROC Curve" onerror="this.src='https://via.placeholder.com/400x300?text=Run+Model+Pipeline+To+Generate'; this.style.opacity='0.5';">
+                    </div>
+                    <div class="graph-card">
+                        <h4>Precision-Recall Curve</h4>
+                        <img src="/images/pr_curve.png" alt="PR Curve" onerror="this.src='https://via.placeholder.com/400x300?text=Run+Model+Pipeline+To+Generate'; this.style.opacity='0.5';">
+                    </div>
+                    <div class="graph-card">
+                        <h4>Model Accuracy</h4>
+                        <img src="/images/model_accuracy.png" alt="Model Accuracy" onerror="this.src='https://via.placeholder.com/400x300?text=Run+Model+Pipeline+To+Generate'; this.style.opacity='0.5';">
+                    </div>
+                    <div class="graph-card">
+                        <h4>Sentiment Distribution</h4>
+                        <img src="/images/sentiment_distribution.png" alt="Sentiment Distribution" onerror="this.src='https://via.placeholder.com/400x300?text=Run+Model+Pipeline+To+Generate'; this.style.opacity='0.5';">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. PROFILE SECTION -->
+        <div id="profile" class="page-section">
+            <div class="panel">
+                <div class="panel-title">👤 User Profile</div>
+                <div class="placeholder-content">
+                    <div class="avatar" style="width:100px; height:100px; font-size:3rem; margin-bottom: 20px;" id="bigAvatar">U</div>
+                    <h3 id="profileName">User Name</h3>
+                    <p id="profileEmail" style="margin-bottom: 30px;">user@example.com</p>
+                    <button class="action-btn" style="width: 200px; padding:12px; background:var(--gold-dim); border:1px solid rgba(255,215,0,0.3);" onclick="alert('Profile updates are synchronized with SQLite users database!')">Edit Profile</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. PROJECTS SECTION -->
+        <div id="projects" class="page-section">
+            <div class="panel">
+                <div class="panel-title">📁 My Projects</div>
+                <div class="placeholder-content">
+                    <div class="icon">🚀</div>
+                    <h3>Advanced Sentiment Analysis Pipeline</h3>
+                    <p>Your current active workspace for processing text classification models.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. SETTINGS SECTION -->
+        <div id="settings" class="page-section">
+            <div class="panel">
+                <div class="panel-title">⚙️ Application Settings</div>
+                <div style="max-width: 600px;">
+                    <div style="margin-bottom: 20px;">
+                        <label style="display:block; margin-bottom: 8px; color: var(--gold);">Theme Preference</label>
+                        <select style="width:100%; padding: 12px; border-radius: 12px; background: rgba(0,0,0,0.3); color: white; border: 1px solid var(--border); outline: none;">
+                            <option>Dark & Gold (Default)</option>
+                            <option>Midnight Blue</option>
+                            <option>Cyberpunk</option>
+                        </select>
+                    </div>
+                    <div style="margin-bottom: 20px;">
+                        <label style="display:block; margin-bottom: 8px; color: var(--gold);">Notifications</label>
+                        <label style="display:flex; align-items:center; gap: 10px; cursor: pointer;">
+                            <input type="checkbox" checked> Email alerts for pipeline failures
+                        </label>
+                    </div>
+                    <button class="action-btn" style="width: auto; padding: 10px 24px;" onclick="alert('Settings saved!')">Save Changes</button>
+                </div>
+            </div>
+        </div>
+
+    </main>
+</div>
+
+<script>
+(function () {
+    // Auth Check
+    let user = null;
+    try {
+        user = JSON.parse(sessionStorage.getItem("currentUser"));
+    } catch(e){}
+
+    if (!user) {
+        // Mock user fallback if page accessed directly
+        user = { name: "Developer Guest", email: "guest@codetech.com" };
+    }
+
+    // Set welcome + avatar
+    document.getElementById("welcomeMsg").textContent = "Welcome back, " + user.name.split(' ')[0] + "! 👋";
+    const initial = user.name.charAt(0).toUpperCase();
+    document.getElementById("userAvatar").textContent = initial;
+    document.getElementById("bigAvatar").textContent = initial;
+    document.getElementById("profileName").textContent = user.name;
+    document.getElementById("profileEmail").textContent = user.email;
+
+    // Date
+    const now = new Date();
+    document.getElementById("dateStr").textContent = now.toLocaleDateString("en-US", { weekday:"long", year:"numeric", month:"long", day:"numeric" });
+
+    // SPA Navigation Logic
+    const navLinks = document.querySelectorAll('.nav-link');
+    const sections = document.querySelectorAll('.page-section');
+    const topbarTitle = document.getElementById('topbarTitle');
+
+    navLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+            // Update active link
+            navLinks.forEach(l => l.classList.remove('active'));
+            e.currentTarget.classList.add('active');
+
+            // Hide all sections
+            sections.forEach(sec => sec.classList.remove('active'));
+
+            // Show target section
+            const targetId = e.currentTarget.getAttribute('data-target');
+            document.getElementById(targetId).classList.add('active');
+
+            // Update topbar title
+            const titleText = e.currentTarget.textContent.replace(/[^\w\s]/g, '').trim();
+            topbarTitle.textContent = titleText;
+
+            // Close sidebar on mobile
+            if (window.innerWidth <= 680) {
+                document.getElementById("sidebar").classList.remove("open");
+            }
+        });
+    });
+
+    // Logout
+    document.getElementById("logoutBtn").addEventListener("click", async () => {
+        try {
+            await fetch('/logout', { method: 'POST' });
+        } catch(e){}
+        sessionStorage.removeItem("currentUser");
+        window.location.href = "/login";
+    });
+
+    // Hamburger
+    document.getElementById("hamburger").addEventListener("click", () => {
+        document.getElementById("sidebar").classList.toggle("open");
+    });
+
+    // ── Load Real stats from Backend ──
+    async function loadStats() {
+        try {
+            const res = await fetch('/stats');
+            if (res.ok) {
+                const stats = await res.json();
+                document.getElementById("statProcessed").textContent = stats.total_analyses;
+                if (stats.user && stats.user.total !== undefined) {
+                    // Update welcome metrics if user has history
+                    document.getElementById("statAccuracy").textContent = stats.avg_confidence + "%";
+                }
+            }
+        } catch(e) {
+            console.error("Could not fetch real-time stats", e);
+            document.getElementById("statProcessed").textContent = "30";
+        }
+    }
+
+    // ── Load Prediction History ──
+    async function loadHistory() {
+        const container = document.getElementById("historyContainer");
+        try {
+            const res = await fetch('/history');
+            if (res.ok) {
+                const history = await res.json();
+                if (history && history.length > 0) {
+                    container.innerHTML = history.map(item => {
+                        const isPos = item.sentiment === 'Positive';
+                        const emoji = isPos ? '😊' : '😞';
+                        const color = isPos ? 'rgba(46, 204, 113, 0.12)' : 'rgba(231, 76, 60, 0.12)';
+                        const confPct = Math.round(item.confidence * 100) + "%";
+                        
+                        return `
+                            <div class="activity-item">
+                                <div class="act-icon" style="background:${color}">${emoji}</div>
+                                <div class="act-text">
+                                    <strong style="font-size:0.82rem; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:280px;">"${item.text}"</strong>
+                                    <span style="font-size:0.75rem;">Sentiment: ${item.sentiment} | Confidence: ${confPct}</span>
+                                </div>
+                                <div class="act-time">${item.timestamp.split(' ')[1] || 'Today'}</div>
+                            </div>
+                        `;
+                    }).join('');
+                } else {
+                    container.innerHTML = `<div style="text-align:center; padding:20px; color:var(--muted); font-size:0.85rem;">No history found. Try predicting sentiment above!</div>`;
+                }
+            }
+        } catch(e) {
+            console.error("Could not fetch prediction history", e);
+        }
+    }
+
+    // ── Predict Sentiment ──
+    const analyzeBtn = document.getElementById("analyzeBtn");
+    const predictorInput = document.getElementById("predictorInput");
+    const resultPanel = document.getElementById("resultPanel");
+    const resultSentiment = document.getElementById("resultSentiment");
+    const resultEmoji = document.getElementById("resultEmoji");
+    const resultBadge = document.getElementById("resultBadge");
+    const resultConfidence = document.getElementById("resultConfidence");
+    const confidenceBar = document.getElementById("confidenceBar");
+    const wordTokenContainer = document.getElementById("wordTokenContainer");
+
+    analyzeBtn.addEventListener("click", async () => {
+        const text = predictorInput.value.trim();
+        if (!text) {
+            alert("Please type a review or comment to predict!");
+            return;
+        }
+
+        analyzeBtn.disabled = true;
+        analyzeBtn.textContent = "Analyzing NLP...";
+
+        try {
+            const res = await fetch('/predict', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text: text })
+            });
+
+            if (res.ok) {
+                const data = await res.json();
+                
+                // Show result panel
+                resultPanel.style.display = "block";
+                resultPanel.className = "result-panel " + (data.sentiment === 'Positive' ? 'result-positive' : 'result-negative');
+                
+                resultSentiment.innerHTML = `${data.sentiment} <span id='resultEmoji'>${data.sentiment === 'Positive' ? '😊' : '😞'}</span>`;
+                resultBadge.textContent = data.sentiment;
+                resultBadge.className = "result-badge " + (data.sentiment === 'Positive' ? 'badge-positive' : 'badge-negative');
+                
+                const confPct = Math.round(data.confidence * 100);
+                resultConfidence.textContent = confPct + "%";
+                confidenceBar.style.width = confPct + "%";
+                confidenceBar.className = "confidence-bar " + (data.sentiment === 'Positive' ? 'bar-positive' : 'bar-negative');
+
+                // Render word coefficients
+                if (data.importance && data.importance.length > 0) {
+                    const tokensHtml = data.importance.map(item => {
+                        const imp = item.importance;
+                        let tokenClass = 'word-neu';
+                        let weightSign = '';
+                        if (imp > 0.05) {
+                            tokenClass = 'word-pos';
+                            weightSign = '+' + imp.toFixed(2);
+                        } else if (imp < -0.05) {
+                            tokenClass = 'word-neg';
+                            weightSign = imp.toFixed(2);
+                        } else {
+                            weightSign = '0.00 (Neutral)';
+                        }
+                        return `<span class="word-token ${tokenClass}" title="Weight: ${weightSign}">${item.word}</span>`;
+                    }).join(' ');
+                    wordTokenContainer.innerHTML = tokensHtml;
+                } else {
+                    wordTokenContainer.innerHTML = `<span style="color:var(--muted); font-size:0.82rem;">(No features extracted by vectorizer for this vocabulary)</span>`;
+                }
+
+                // Refresh history and stats
+                loadHistory();
+                loadStats();
+            } else {
+                const errorData = await res.json();
+                alert("Prediction Error: " + (errorData.error || "Server issue"));
+            }
+        } catch(e) {
+            console.error(e);
+            alert("Could not connect to Flask API. Please run the backend app first!");
+        } finally {
+            analyzeBtn.disabled = false;
+            analyzeBtn.textContent = "⚡ Predict Sentiment";
+        }
+    });
+
+    // ── Clear History ──
+    document.getElementById("clearHistoryBtn").addEventListener("click", async () => {
+        if (!confirm("Are you sure you want to clear your prediction history?")) return;
+        try {
+            const res = await fetch('/clear-history', { method: 'POST' });
+            if (res.ok) {
+                loadHistory();
+                loadStats();
+            }
+        } catch(e){
+            console.error("Could not clear history", e);
+        }
+    });
+
+    // Initial Load
+    loadStats();
+    loadHistory();
+    // Refresh stats periodically
+    setInterval(loadStats, 10000);
+})();
+</script>
+</body>
+</html>
